@@ -15,7 +15,6 @@ public class App {
             fileController.start();
             
             System.out.println("filetogo server started on port 8080");
-            System.out.println("UI available at http://localhost:3000");
             
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("Shutting down server...");
