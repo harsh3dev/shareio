@@ -1,0 +1,23 @@
+services:
+  share-service:
+    image: harsh3dev/harsh3dev:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - sharer
+
+  nginx:
+    image: nginx:1.25
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - share-service
+    networks:
+      - sharer
+
+networks:
+  sharer:
+    driver: bridge

@@ -1,0 +1,59 @@
+name: Deploy Share-Service
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  IMAGE: harsh3dev/harsh3dev      # ← must match your Docker Hub repo
+  DROPLET_IP: ${{ secrets.SERVER_IP }}
+  DROPLET_USER: root
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Share-Service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: share-service/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Share-Service
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ env.DROPLET_IP }}
+          username: ${{ env.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/share-service
+            # Pull the latest share-service image
+            docker-compose pull share-service
+            # Deploy only the share-service
+            docker-compose up -d share-service
+            # Clean up old images
+            docker image prune -f
+            # Clean up old images
+            docker image prune -f
