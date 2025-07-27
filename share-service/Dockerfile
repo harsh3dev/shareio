@@ -1,5 +1,5 @@
 # Build stage: use Maven to compile and package
-FROM maven:3.9-openjdk-17-slim AS build
+FROM maven:3.9-openjdk-17 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
