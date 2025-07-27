@@ -1,15 +1,18 @@
-# Stage 1: build with Maven
-FROM maven:3.9.4-eclipse-temurin-17 AS builder
-WORKDIR /usr/src/app
+# Build stage: use Maven to compile and package
+FROM maven:3.9-openjdk-17-slim AS build
+WORKDIR /build
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package
 
-COPY share-service/pom.xml ./
-COPY share-service/src ./src
-RUN mvn clean package -DskipTests
-
-# Stage 2: runtime
-FROM eclipse-temurin:17-jdk
+# Runtime stage: only include what we need to run the app
+FROM openjdk:17-slim
 WORKDIR /app
-COPY --from=builder /usr/src/app/target/*.jar app.jar
+
+# Copy compiled app jar and its dependencies
+COPY --from=build /build/target/share-service-1.0-SNAPSHOT.jar app.jar
+COPY --from=build /build/target/dependency/*.jar ./lib/
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+CMD ["java", "-cp", "app.jar:lib/*", "p2p.App"]
