@@ -1,8 +1,8 @@
 # Build stage: use Maven to compile and package
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /build
-COPY pom.xml .
-COPY src ./src
+COPY share-service/pom.xml .
+COPY share-service/src ./src
 RUN mvn clean package
 
 # Runtime stage: only include what we need to run the app

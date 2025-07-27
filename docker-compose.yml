@@ -1,6 +1,8 @@
 services:
   share-service:
-    image: harsh3dev/harsh3dev:latest
+    build:
+      context: ./share-service
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "8080:8080"
