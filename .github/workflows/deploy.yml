@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 env:
-  IMAGE: harsh3dev/harsh3dev
+  IMAGE: harsh3dev/share-service
   DROPLET_IP: ${{ secrets.SERVER_IP }}
   DROPLET_USER: root
 
@@ -50,29 +50,25 @@ jobs:
           script: |
             set -e  # Exit on any error
 
+            # Clone or update repo
             mkdir -p /opt
-
             if [ ! -d /opt/share-service/.git ]; then
-                echo "Cloning repo into /opt/share-service..."
-                rm -rf /opt/share-service
-                git clone https://github.com/harsh3dev/shareio.git /opt/share-service
+              echo "Cloning repo into /opt/share-service..."
+              rm -rf /opt/share-service
+              git clone https://github.com/harsh3dev/shareio.git /opt/share-service
             else
-                echo "Repo already exists, pulling latest..."
-                cd /opt/share-service && git pull origin main
+              echo "Repo already exists, pulling latest..."
+              cd /opt/share-service && git pull origin main
             fi
 
             cd /opt/share-service
 
-            # Debug: Confirm contents
-            echo "Listing contents of /opt/share-service:"
-            ls -la
+            # Login to Docker Hub to pull private image
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-            # Check docker and docker-compose exist
-            if ! command -v docker-compose &> /dev/null; then
-                echo "docker-compose not installed"
-                exit 1
-            fi
-
+            # Pull and start container
             docker-compose pull
             docker-compose up -d
+
+            # Clean unused images
             docker image prune -f
