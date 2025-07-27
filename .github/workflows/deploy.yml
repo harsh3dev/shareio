@@ -48,20 +48,31 @@ jobs:
           username: ${{ env.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Clone or pull latest version of the repo
-            if [ ! -d /opt/share-service ]; then
-              git clone https://github.com/harsh3dev/shareio.git /opt/share-service
+            set -e  # Exit on any error
+
+            mkdir -p /opt
+
+            if [ ! -d /opt/share-service/.git ]; then
+                echo "Cloning repo into /opt/share-service..."
+                rm -rf /opt/share-service
+                git clone https://github.com/harsh3dev/shareio.git /opt/share-service
             else
-              cd /opt/share-service && git pull origin main
+                echo "Repo already exists, pulling latest..."
+                cd /opt/share-service && git pull origin main
             fi
 
             cd /opt/share-service
 
-            # Pull the latest image
+            # Debug: Confirm contents
+            echo "Listing contents of /opt/share-service:"
+            ls -la
+
+            # Check docker and docker-compose exist
+            if ! command -v docker-compose &> /dev/null; then
+                echo "docker-compose not installed"
+                exit 1
+            fi
+
             docker-compose pull
-
-            # Start or restart services
             docker-compose up -d
-
-            # Remove dangling images
             docker image prune -f
