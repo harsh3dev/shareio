@@ -247,17 +247,17 @@ public class FileController {
             
             // Extract password from query parameters
             String query = exchange.getRequestURI().getQuery();
-            String password = null;
+            String clientPassword = null;
             if (query != null) {
                 String[] params = query.split("&");
                 for (String param : params) {
                     if (param.startsWith("pass=")) {
-                        password = param.substring(5);
+                        clientPassword = param.substring(5);
                         // URL decode the password if needed
-                        password = java.net.URLDecoder.decode(password, "UTF-8");
+                        clientPassword = java.net.URLDecoder.decode(clientPassword, "UTF-8");
                         break;
                     } else if (param.equals("pass")) {
-                        password = ""; // Empty password parameter
+                        clientPassword = ""; // Empty password parameter
                         break;
                     }
                 }
@@ -266,71 +266,37 @@ public class FileController {
             try {
                 int port = Integer.parseInt(portStr);
                 
-                // Validate password before connecting to socket
-                if (!fileSharer.validatePassword(port, password)) {
-                    // Check if file exists first
-                    if (fileSharer.getFileInfo(port) == null) {
-                        String response = "Not Found: File not available on this port";
-                        exchange.sendResponseHeaders(404, response.getBytes().length);
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(response.getBytes());
-                        }
-                        return;
+                // Check if file exists on the port
+                if (fileSharer.getFileInfo(port) == null) {
+                    String response = "Not Found: File not available on this port";
+                    exchange.sendResponseHeaders(404, response.getBytes().length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(response.getBytes());
                     }
-                    
-                    // File exists but password validation failed
-                    String filePassword = fileSharer.getFileInfo(port).getPassword();
-                    if (filePassword != null && !filePassword.isEmpty()) {
-                        // File requires password
-                        if (password == null) {
-                            String response = "Unauthorized: Password required for this file";
-                            headers.add("Content-Type", "text/plain");
-                            exchange.sendResponseHeaders(401, response.getBytes().length);
-                            try (OutputStream os = exchange.getResponseBody()) {
-                                os.write(response.getBytes());
-                            }
-                            return;
-                        } else if (password.isEmpty()) {
-                            String response = "Unauthorized: Empty password not allowed";
-                            headers.add("Content-Type", "text/plain");
-                            exchange.sendResponseHeaders(401, response.getBytes().length);
-                            try (OutputStream os = exchange.getResponseBody()) {
-                                os.write(response.getBytes());
-                            }
-                            return;
-                        } else {
-                            String response = "Unauthorized: Invalid password";
-                            headers.add("Content-Type", "text/plain");
-                            exchange.sendResponseHeaders(401, response.getBytes().length);
-                            try (OutputStream os = exchange.getResponseBody()) {
-                                os.write(response.getBytes());
-                            }
-                            return;
-                        }
-                    } else {
-                        // File doesn't require password but password was provided
-                        String response = "Bad Request: Password provided but file is not password protected";
+                    return;
+                }
+                
+                // Simple password validation at HTTP level
+                String requiredPassword = fileSharer.getFilePassword(port);
+                
+                if (requiredPassword != null) {
+                    // File has a password - validate it
+                    if (clientPassword == null || !requiredPassword.equals(clientPassword)) {
+                        String response = "Unauthorized: Invalid or missing password";
                         headers.add("Content-Type", "text/plain");
-                        exchange.sendResponseHeaders(400, response.getBytes().length);
+                        exchange.sendResponseHeaders(401, response.getBytes().length);
                         try (OutputStream os = exchange.getResponseBody()) {
                             os.write(response.getBytes());
                         }
                         return;
                     }
                 }
+                // If file has no password or password matches, proceed with download
                 
-                // Password validation passed, now download the file
+                // Connect to socket and download file (no password exchange needed)
                 try (Socket socket = new Socket("localhost", port);
                      InputStream socketInput = socket.getInputStream()) {
 
-                        /**
-                         * here we get the input stream from the socket
-                         * and get the filename from the header
-                         * through the headerBaos
-                         * then write the file content to a temporary file
-                         */
-                        
-                    
                     File tempFile = File.createTempFile("download-", ".tmp");
                     String filename = "downloaded-file"; // Default filename
                     
@@ -338,6 +304,7 @@ public class FileController {
                         byte[] buffer = new byte[4096];
                         int bytesRead;
                         
+                        // Read filename header
                         ByteArrayOutputStream headerBaos = new ByteArrayOutputStream();
                         int b;
                         while ((b = socketInput.read()) != -1) {
@@ -345,11 +312,14 @@ public class FileController {
                             headerBaos.write(b);
                         }
                         
-                        String header = headerBaos.toString().trim();
-                        if (header.startsWith("Filename: ")) {
-                            filename = header.substring("Filename: ".length());
+                        String headerLine = headerBaos.toString().trim();
+                        
+                        // Parse filename from header
+                        if (headerLine.startsWith("Filename: ")) {
+                            filename = headerLine.substring("Filename: ".length());
                         }
                         
+                        // Read file content
                         while ((bytesRead = socketInput.read(buffer)) != -1) {
                             fos.write(buffer, 0, bytesRead);
                         }

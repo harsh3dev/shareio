@@ -55,6 +55,14 @@ public class FileSharer {
         return availableFiles.get(port);
     }
 
+    public String getFilePassword(int port) {
+        FileInfo fileInfo = availableFiles.get(port);
+        if (fileInfo == null) {
+            return null;
+        }
+        return fileInfo.getPassword();
+    }
+
     public boolean validatePassword(int port, String providedPassword) {
         FileInfo fileInfo = availableFiles.get(port);
         if (fileInfo == null) {
@@ -107,30 +115,9 @@ public class FileSharer {
 
         @Override
         public void run() {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                 OutputStream oss = clientSocket.getOutputStream()) {
+            try (OutputStream oss = clientSocket.getOutputStream()) {
                 
-                // Check if password is required
-                String password = fileInfo.getPassword();
-                if (password != null && !password.isEmpty()) {
-                    // Send password request
-                    oss.write("PASSWORD_REQUIRED\n".getBytes());
-                    oss.flush();
-                    
-                    // Read password from client
-                    String clientPassword = reader.readLine();
-                    if (!password.equals(clientPassword)) {
-                        oss.write("UNAUTHORIZED\n".getBytes());
-                        System.out.println("Unauthorized access attempt from " + clientSocket.getInetAddress());
-                        return;
-                    }
-                    
-                    // Send authorization success
-                    oss.write("AUTHORIZED\n".getBytes());
-                    oss.flush();
-                }
-                
-                // Send the filename as a header
+                // Send the filename as a header (no password authentication at socket level)
                 String filename = new File(fileInfo.getFilePath()).getName();
                 String header = "Filename: " + filename + "\n";
                 oss.write(header.getBytes());
