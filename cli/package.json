@@ -1,0 +1,43 @@
+{
+  "name": "shareio",
+  "version": "1.0.0",
+  "description": "CLI based P2P file sharing",
+  "keywords": [
+    "cli",
+    "share",
+    "file",
+    "p2p",
+    "transfer"
+  ],
+  "license": "MIT",
+  "author": "Harsh Pandey",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "shareio": "./bin/shareio.js"
+  },
+  "scripts": {
+    "start": "node bin/shareio.js",
+    "dev": "node bin/shareio.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^5.3.0",
+    "axios": "^1.7.3",
+    "form-data": "^4.0.0",
+    "fs-extra": "^11.2.0",
+    "cli-progress": "^3.12.0",
+    "ora": "^8.0.1",
+    "dotenv": "^16.4.5",
+    "validator": "^13.12.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ]
+}
