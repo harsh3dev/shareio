@@ -46,11 +46,19 @@ export async function uploadFile(filePath, password) {
     if (password) {
       formData.append('password', password);
     }
+
+    // Get form data length asynchronously
+    const formLength = await new Promise((resolve, reject) => {
+      formData.getLength((err, length) => {
+        if (err) reject(err);
+        else resolve(length);
+      });
+    });
     
     const response = await apiClient.post('/upload', formData, {
       headers: {
         ...formData.getHeaders(),
-        'Content-Length': formData.getLengthSync()
+        'Content-Length': formLength
       },
       maxContentLength: config.upload.maxFileSize,
       maxBodyLength: config.upload.maxFileSize,
@@ -79,7 +87,14 @@ export async function downloadFile(fileCode, password, outputPath) {
   try {
     const apiClient = createApiClient();
     
-    const response = await apiClient.get(`/download/${fileCode}`, {
+    // Build URL with password query parameter if provided
+    let downloadUrl = `/download/${fileCode}`;
+    if (password) {
+      const encodedPassword = encodeURIComponent(password);
+      downloadUrl += `?pass=${encodedPassword}`;
+    }
+    
+    const response = await apiClient.get(downloadUrl, {
       responseType: 'stream',
       timeout: config.download.timeout
     });

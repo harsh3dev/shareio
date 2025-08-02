@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class FileSharer {
 
-    private static class FileInfo {
+    public static class FileInfo {
 
         private String filePath;
         private String password;
@@ -49,6 +49,27 @@ public class FileSharer {
                 return port;
             }
         }
+    }
+
+    public FileInfo getFileInfo(int port) {
+        return availableFiles.get(port);
+    }
+
+    public boolean validatePassword(int port, String providedPassword) {
+        FileInfo fileInfo = availableFiles.get(port);
+        if (fileInfo == null) {
+            return false; // Port not found
+        }
+        
+        String requiredPassword = fileInfo.getPassword();
+        
+        // If no password is required
+        if (requiredPassword == null || requiredPassword.isEmpty()) {
+            return providedPassword == null || providedPassword.isEmpty();
+        }
+        
+        // If password is required
+        return requiredPassword.equals(providedPassword);
     }
 
     public void startFileServer(int port) {

@@ -40,6 +40,7 @@ public class FileController {
         
         server.createContext("/upload", new UploadHandler());
         server.createContext("/download", new DownloadHandler());
+        server.createContext("/health", new HealthHandler());
         server.createContext("/", new CORSHandler());
         
         server.setExecutor(executorService);
@@ -71,6 +72,35 @@ public class FileController {
             
             String response = "Not Found";
             exchange.sendResponseHeaders(404, response.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        }
+    }
+    
+    private class HealthHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            Headers headers = exchange.getResponseHeaders();
+            headers.add("Access-Control-Allow-Origin", "*");
+            headers.add("Content-Type", "application/json");
+            
+            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            
+            if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+                String response = "Method Not Allowed";
+                exchange.sendResponseHeaders(405, response.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+                return;
+            }
+            
+            String response = "{\"status\":\"ok\",\"message\":\"ShareIO service is running\"}";
+            exchange.sendResponseHeaders(200, response.getBytes().length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
             }
@@ -215,9 +245,81 @@ public class FileController {
             String path = exchange.getRequestURI().getPath();
             String portStr = path.substring(path.lastIndexOf('/') + 1);
             
+            // Extract password from query parameters
+            String query = exchange.getRequestURI().getQuery();
+            String password = null;
+            if (query != null) {
+                String[] params = query.split("&");
+                for (String param : params) {
+                    if (param.startsWith("pass=")) {
+                        password = param.substring(5);
+                        // URL decode the password if needed
+                        password = java.net.URLDecoder.decode(password, "UTF-8");
+                        break;
+                    } else if (param.equals("pass")) {
+                        password = ""; // Empty password parameter
+                        break;
+                    }
+                }
+            }
+            
             try {
                 int port = Integer.parseInt(portStr);
                 
+                // Validate password before connecting to socket
+                if (!fileSharer.validatePassword(port, password)) {
+                    // Check if file exists first
+                    if (fileSharer.getFileInfo(port) == null) {
+                        String response = "Not Found: File not available on this port";
+                        exchange.sendResponseHeaders(404, response.getBytes().length);
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(response.getBytes());
+                        }
+                        return;
+                    }
+                    
+                    // File exists but password validation failed
+                    String filePassword = fileSharer.getFileInfo(port).getPassword();
+                    if (filePassword != null && !filePassword.isEmpty()) {
+                        // File requires password
+                        if (password == null) {
+                            String response = "Unauthorized: Password required for this file";
+                            headers.add("Content-Type", "text/plain");
+                            exchange.sendResponseHeaders(401, response.getBytes().length);
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(response.getBytes());
+                            }
+                            return;
+                        } else if (password.isEmpty()) {
+                            String response = "Unauthorized: Empty password not allowed";
+                            headers.add("Content-Type", "text/plain");
+                            exchange.sendResponseHeaders(401, response.getBytes().length);
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(response.getBytes());
+                            }
+                            return;
+                        } else {
+                            String response = "Unauthorized: Invalid password";
+                            headers.add("Content-Type", "text/plain");
+                            exchange.sendResponseHeaders(401, response.getBytes().length);
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(response.getBytes());
+                            }
+                            return;
+                        }
+                    } else {
+                        // File doesn't require password but password was provided
+                        String response = "Bad Request: Password provided but file is not password protected";
+                        headers.add("Content-Type", "text/plain");
+                        exchange.sendResponseHeaders(400, response.getBytes().length);
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(response.getBytes());
+                        }
+                        return;
+                    }
+                }
+                
+                // Password validation passed, now download the file
                 try (Socket socket = new Socket("localhost", port);
                      InputStream socketInput = socket.getInputStream()) {
 
