@@ -79,7 +79,7 @@ export async function uploadFile(filePath, password) {
 /**
  * Download a file from the backend service
  * @param {string} fileCode - File code (port number)
- * @param {string} password - Optional password for the file (currently not used by backend)
+ * @param {string} password - Optional password for the file
  * @param {string} outputPath - Output directory path
  * @returns {Promise<object>} Download result
  */
