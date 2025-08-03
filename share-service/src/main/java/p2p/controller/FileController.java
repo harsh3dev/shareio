@@ -61,19 +61,24 @@ public class FileController {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             Headers headers = exchange.getResponseHeaders();
-            headers.add("Access-Control-Allow-Origin", "*");
+            String origin = exchange.getRequestHeaders().getFirst("Origin");
+            
+            // Allow only same-origin requests
+            if (origin != null && origin.equals("http://" + exchange.getLocalAddress().getHostName() + ":" + exchange.getLocalAddress().getPort())) {
+            headers.add("Access-Control-Allow-Origin", origin);
             headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+            }
             
             if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
+            exchange.sendResponseHeaders(204, -1);
+            return;
             }
             
             String response = "Not Found";
             exchange.sendResponseHeaders(404, response.getBytes().length);
             try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes());
+            os.write(response.getBytes());
             }
         }
     }
