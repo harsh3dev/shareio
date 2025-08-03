@@ -1,6 +1,6 @@
 {
-  "name": "shareio",
-  "version": "1.0.0",
+  "name": "liteshare",
+  "version": "1.0.1",
   "description": "CLI based P2P file sharing",
   "keywords": [
     "cli",
@@ -14,11 +14,11 @@
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "shareio": "./bin/shareio.js"
+    "liteshare": "./bin/liteshare.js"
   },
   "scripts": {
-    "start": "node bin/shareio.js",
-    "dev": "node bin/shareio.js",
+    "start": "node bin/liteshare.js",
+    "dev": "node bin/liteshare.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

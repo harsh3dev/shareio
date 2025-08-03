@@ -1,4 +1,4 @@
-# ShareIO CLI
+# LiteShare CLI
 
 🚀 A powerful CLI tool for peer-to-peer file sharing with password protection and progress tracking.
 
@@ -13,10 +13,10 @@
 
 ```bash
 # Install globally
-npm install -g shareio
+npm install -g liteshare
 
 # Or use without installation
-npx shareio --help
+npx liteshare --help
 ```
 
 ## Usage
@@ -25,29 +25,29 @@ npx shareio --help
 
 ```bash
 # Basic upload
-npx shareio post ./document.pdf
+npx liteshare post ./document.pdf
 
 # Upload with password protection
-npx shareio post ./document.pdf --pass 1234
+npx liteshare post ./document.pdf --pass 1234
 
 # or
-npx shareio post ./document.pdf --p 1234
+npx liteshare post ./document.pdf --p 1234
 ```
 
 ### Download a file
 
 ```bash
 # Basic download
-npx shareio get <file_code>
+npx liteshare get <file_code>
 
 # Download with password
-npx shareio get <file_code> --pass 1234
+npx liteshare get <file_code> --pass 1234
 
 # or
-npx shareio get <file_code> --p 1234
+npx liteshare get <file_code> --p 1234
 
 # Download to specific directory
-npx shareio get <file_code> -o ./downloads/
+npx liteshare get <file_code> -o ./downloads/
 
 # you will get a file code upon file upload
 
@@ -67,7 +67,7 @@ Upload and share a file.
 
 **Example:**
 ```bash
-npx shareio post ./my-file.pdf --pass secretpassword
+npx liteshare post ./my-file.pdf --pass secretpassword
 ```
 
 ### `get <code>`
@@ -83,7 +83,7 @@ Download a shared file using its file code.
 
 **Example:**
 ```bash
-npx shareio get 60815 --pass secretpassword -o ./downloads/
+npx liteshare get 60815 --pass secretpassword -o ./downloads/
 ```
 
 

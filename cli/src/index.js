@@ -28,7 +28,7 @@ const program = new Command();
 
 // Set up the CLI
 program
-  .name('shareio')
+  .name('liteshare')
   .description(chalk.cyan('🚀 CLI based P2P file sharing tool'))
   .version(packageJson.version, '-v, --version', 'display version number');
 
@@ -52,11 +52,11 @@ program
 // Add help examples
 program.addHelpText('after', `
 ${chalk.yellow('Examples:')}
-  ${chalk.gray('$')} npx shareio post ./document.pdf
-  ${chalk.gray('$')} npx shareio post ./document.pdf --pass 1234
-  ${chalk.gray('$')} npx shareio get 8081
-  ${chalk.gray('$')} npx shareio get 8081 --pass 1234
-  ${chalk.gray('$')} npx shareio get 8081 -o ./downloads/
+  ${chalk.gray('$')} npx liteshare post ./document.pdf
+  ${chalk.gray('$')} npx liteshare post ./document.pdf --pass 1234
+  ${chalk.gray('$')} npx liteshare get 8081
+  ${chalk.gray('$')} npx liteshare get 8081 --pass 1234
+  ${chalk.gray('$')} npx liteshare get 8081 -o ./downloads/
 `);
 
 // Handle unknown commands

@@ -128,10 +128,10 @@ export function displayUploadResult(result, fileInfo) {
     console.log(chalk.gray('  File Code:'), chalk.yellow.bold(result.fileCode));
     console.log();
     console.log(chalk.cyan('📋 To download this file, use:'));
-    console.log(chalk.white(`  npx shareio get ${result.fileCode}`));
+    console.log(chalk.white(`  npx liteshare get ${result.fileCode}`));
     
     if (result.data?.password) {
-      console.log(chalk.white(`  npx shareio get ${result.fileCode} --pass YOUR_PASSWORD`));
+      console.log(chalk.white(`  npx liteshare get ${result.fileCode} --pass YOUR_PASSWORD`));
     }
     
     console.log();
