@@ -21,7 +21,7 @@ function createApiClient() {
     baseURL,
     timeout: config.backend.timeout,
     headers: {
-      'User-Agent': 'LiteShare-CLI/1.0.2'
+      'User-Agent': 'LiteShare-CLI/1.0.3'
     }
   });
 }
