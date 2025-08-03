@@ -44,13 +44,7 @@ export const config = {
  * @returns {string} Base URL
  */
 export function getBackendUrl() {
-  const ENVIRONMENT = process.env.NODE_ENV || 'prod';
-  if(ENVIRONMENT === 'prod'){
-    return `${config.backend.API_URL}`;
-  }
-  const finalHost = config.backend.host;
-  const finalPort = config.backend.port;
-  return `${config.backend.protocol}://${finalHost}:${finalPort}`;
+  return `${config.backend.API_URL}`;
 }
 
 /**
