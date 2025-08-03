@@ -3,6 +3,17 @@ name: Deploy Share-Service and CLI
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
 
 env:
   DROPLET_IP: ${{ secrets.SERVER_IP }}
@@ -11,10 +22,14 @@ env:
 jobs:
   deploy-cli:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allow writing to repository
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -27,6 +42,32 @@ jobs:
           cd cli
           npm ci
           
+      - name: Auto-increment version
+        id: version
+        run: |
+          cd cli
+          # Use input version bump type, or default to patch
+          VERSION_BUMP="${{ github.event.inputs.version_bump || 'patch' }}"
+          echo "Bumping $VERSION_BUMP version..."
+          npm version $VERSION_BUMP --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Update User-Agent in API client
+        run: |
+          cd cli
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          # Use Node.js to update the file (cross-platform)
+          node -e "
+            const fs = require('fs');
+            const path = './src/services/apiClient.js';
+            let content = fs.readFileSync(path, 'utf8');
+            content = content.replace(/'LiteShare-CLI\/[0-9]+\.[0-9]+\.[0-9]+'/g, \"'LiteShare-CLI/$NEW_VERSION'\");
+            fs.writeFileSync(path, content);
+            console.log('Updated User-Agent to LiteShare-CLI/$NEW_VERSION');
+          "
+          
       - name: Run CLI tests (if available)
         run: |
           cd cli
@@ -38,6 +79,15 @@ jobs:
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Commit version changes
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add cli/package.json cli/src/services/apiClient.js
+          git commit -m "🚀 Auto-bump CLI version to v$NEW_VERSION [skip ci]" || echo "No changes to commit"
+          git push
 
   deploy-backend:
     runs-on: ubuntu-latest
