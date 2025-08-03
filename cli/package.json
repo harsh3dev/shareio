@@ -1,6 +1,6 @@
 {
   "name": "liteshare",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI based P2P file sharing",
   "keywords": [
     "cli",
