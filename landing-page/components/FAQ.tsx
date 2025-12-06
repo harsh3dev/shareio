@@ -15,8 +15,8 @@ export function FAQ() {
       answer: "Yes. Direct P2P transfer means your files don't sit on a central server. You can also password protect transfers."
     },
     {
-      question: "Is there a file size limit?",
-      answer: "No limits. Since it's P2P, you can transfer files as large as your internet connection allows."
+      question: "What file-types are supported?",
+      answer: "All file types are supported."
     },
     {
       question: "What happens if I close the terminal?",
@@ -61,9 +61,9 @@ export function FAQ() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <motion.img 
-              src="https://ik.imagekit.io/6d1smec2e/lietshare/litesharefloppy.webp" 
+              src="https://ik.imagekit.io/6d1smec2e/lietshare/litesharefloppyfaqimage.webp" 
               alt="Liteshare Floppy Disk" 
-              className="w-full max-w-xl h-auto object-contain cursor-pointer"
+              className="w-full max-w-[450px] h-auto object-contain cursor-pointer"
               style={{
                 filter: 'drop-shadow(0 0 20px rgba(255, 0, 51, 0.08)) drop-shadow(0 0 40px rgba(255, 0, 51, 0.08))'
               }}

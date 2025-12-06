@@ -7,7 +7,7 @@ export function Footer() {
         <div className="text-sm text-[var(--color-foreground)]/60">
           Built with <span className="text-[var(--color-error)]">❤️</span> by{" "}
           <Link
-            href="https://github.com/harsh3dev"
+            href="https://www.harshai.me/"
             target="_blank"
             className="text-[var(--color-foreground)] hover:text-[var(--color-primary)] underline underline-offset-4"
           >
@@ -15,8 +15,8 @@ export function Footer() {
           </Link>
         </div>
         <div className="flex gap-6 text-sm text-[var(--color-foreground)]/60">
-          <Link href="#" className="hover:text-[var(--color-foreground)]">
-            MIT License
+          <Link href="https://www.linkedin.com/in/harsh3dev/" className="hover:text-[var(--color-foreground)]">
+            LinkedIn
           </Link>
           <Link href="https://github.com/harsh3dev/shareio" className="hover:text-[var(--color-foreground)]">
             Documentation
