@@ -8,6 +8,27 @@ import Head from "next/head";
 export const metadata: Metadata = {
   title: "Liteshare - P2P File Sharing",
   description: "Fast, secure, and developer-focused P2P file sharing directly from your terminal.",
+  metadataBase: new URL('https://liteshare.vercel.app'),
+  openGraph: {
+    type: 'website',
+    url: 'https://liteshare.vercel.app/',
+    title: 'Liteshare - P2P File Sharing',
+    description: 'Fast, secure, and developer-focused P2P file sharing directly from your terminal.',
+    images: [
+      {
+        url: 'https://ik.imagekit.io/6d1smec2e/lietshare/liteshareogimage.png',
+        width: 1200,
+        height: 630,
+        alt: 'Liteshare - P2P File Sharing',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Liteshare - P2P File Sharing',
+    description: 'Fast, secure, and developer-focused P2P file sharing directly from your terminal.',
+    images: ['https://ik.imagekit.io/6d1smec2e/lietshare/liteshareogimage.png'],
+  },
 };
 
 export default function RootLayout({
