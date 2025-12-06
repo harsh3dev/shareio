@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
 import SmoothScroll from "@/components/SmoothScroll";
+import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Liteshare - P2P File Sharing",
@@ -16,6 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="c079db70-d4dd-4ac7-b3f5-5c1b5a445b97"></script>
+      </Head>
       <body
         className={`antialiased`}
       >
